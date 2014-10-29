@@ -8,7 +8,6 @@
 			"text":this.textSort,
 		};
 		this.columns = {};
-		this.filteredData = new Array;
 		this.sortedFields = {};
 		this.settings = {
 			orderField:{},
@@ -43,7 +42,7 @@
 		this.setFilters(this.settings.filterField);
 		this.prepareHeader();
 		this.prepareFilter();
-		this.prepareBody(true);
+		this.prepareBody({needSort:true});
 		this.bindEvents();
 		return this.getTable();
 	}
@@ -52,50 +51,48 @@
 		return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 	}
 	
-	Grid.prototype.filterFunction = function(searchString,elem){
-		for(var i=0;i<this.settings.data.length;i++){
-			var flagFind = true;
-			for(var j in searchString){
-				if(!this.settings.data[i][j].toString().toLowerCase().match(this.escapeString(searchString[j]).toLowerCase()))
-					flagFind = false;
+	Grid.prototype.filterFunction = function(searchString){
+		var partSelector = new Array();
+		var emptySearch = true;
+		$(searchString).each(function(){
+			var val = $.trim($(this).find('.search-filter-field').val().toLowerCase());
+			var key = $(this).attr('filterGridId')
+			if(!!val) {
+				emptySearch = false;
+				partSelector.push(':has(td[filterGridId="'+key+'"][columnvalue*="'+val+'"])'); 
 			}
+		})
 			
-			if(!flagFind){
-				for(var k in this.filteredData){
-					if(JSON.stringify(this.filteredData[k]) == JSON.stringify(this.settings.data[i])){
-						delete this.filteredData[k];
-						break;
-					}
-				}	
-				//if(!!JSON.stringify(this.filteredData).match(JSON.stringify(this.settings.data[i]))){
-				
-				//	this.filteredData = JSON.parse(JSON.stringify(this.filteredData).replace(JSON.stringify(this.settings.data[i]),'').replace('[,','[').replace(',,',',').replace(',]',']'));
-				//}
-
-				continue;
-			}else{
-				if(!JSON.stringify(this.filteredData).match(JSON.stringify(this.settings.data[i])))
-					this.filteredData.push(this.settings.data[i]);
-			}
+		if(emptySearch){
+			$(this.tbody).children('tr').show();
+			return;
 		}
-		this.prepareBody(false,this.filteredData);
+		var selector = "tr"+partSelector.join('');
+		$(this.tbody).children('tr').hide();
+		$(this.tbody).children(selector).show();
+		return;
 	}
 	Grid.prototype.orderFunction = function(elem,type){
-		if(!(!!this.orderTypes[type])) throw new Error("'"+type+"' order type doesn't exist");//debugger
+		if(!(!!this.orderTypes[type])) throw new Error("'"+type+"' order type doesn't exist");
 		if($.type(this.sortedFields[elem]) == "undefined") this.sortedFields[elem] = 1;
 		this.orderTypes[type].call(this,elem,this.sortedFields[elem]);
-		this.prepareBody(false);
 		this.sortedFields[elem] = this.sortedFields[elem]*-1;
 	}
 	Grid.prototype.textSort = function(elem,sortedFieldsIndex){
-		this.settings.data.sort(function (a, b){
-			return (a[elem] < b[elem]) ? -1*sortedFieldsIndex : (a[elem] > b[elem]) ? 1*sortedFieldsIndex : 0;
+		var sortElem = $(this.tbody).children('tr').sort(function (a, b){
+			var aVal = $(a).find('td[filterGridId="'+elem+'"]').attr('columnValue')
+			var bVal = $(b).find('td[filterGridId="'+elem+'"]').attr('columnValue')	
+			return (aVal < bVal) ? -1*sortedFieldsIndex : (aVal > bVal) ? 1*sortedFieldsIndex : 0;
 		});
+		$(this.tbody).empty().append($(sortElem))
 	}
 	Grid.prototype.dateSort = function(elem,sortedFieldsIndex){
-		this.settings.data.sort(function (a, b){
-			return (new Date(a[elem]) < new Date(b[elem])) ? -1*sortedFieldsIndex : (new Date(a[elem]) > new Date(b[elem])) ? 1*sortedFieldsIndex : 0;
-		});	
+		var sortElem = $(this.tbody).children('tr').sort(function (a, b){
+			var aVal = $(a).find('td[filterGridId="'+elem+'"]').attr('columnValue')
+			var bVal = $(b).find('td[filterGridId="'+elem+'"]').attr('columnValue')	
+			return (new Date(aVal) < new Date(bVal)) ? -1*sortedFieldsIndex : (new Date(aVal) > new Date(bVal)) ? 1*sortedFieldsIndex : 0;
+		});
+		$(this.tbody).empty().append($(sortElem))
 	}
 	Grid.prototype.dataSort = function(data){
 		if(!(!!this.settings.dataSort)) return data;
@@ -123,19 +120,28 @@
 	Grid.prototype.bindEvents = function(){
 		//$("#"+this.settings.id).find('order-on').off('click').on('click',this.orderFunction);
 	}
-	Grid.prototype.prepareBody = function(needSort,data){
-		data = data || this.settings.data;
-		if(needSort && this.settings.dataSort) data = this.dataSort(data);
-		$(this.tbody).empty();
+	Grid.prototype.prepareBody = function(data){
+		var options = {
+			data:this.settings.data,
+			needSort:false,
+			clearResult:true
+		};
+		$.extend(options,data);
+		if(options.needSort && this.settings.dataSort) options.data = this.dataSort(options.data);
+		if(!!options.clearResult) $(this.tbody).empty();
 		var tr = $();
-		for (var i=0;i<data.length;i++){
+		for (var i=0;i<options.data.length;i++){
 			var td = $();
-			for (var j in data[i]){
-				var tempTd = this.settings.columnsBodyCallback.call({},$("<td>").addClass('history-table-column').append(data[i][j])[0],data[i][j],i,j);
+			for (var j in options.data[i]){
+				//options.data[i][j]
+				if(!(!!options.data[i][j])) options.data[i][j] = '';
+				options.data[i][j] = options.data[i][j].toString();
+				var tempTd = this.settings.columnsBodyCallback.call({},$("<td>").addClass('history-table-column').append(options.data[i][j])[0],options.data[i][j],i,j);
 				if(!(!!tempTd)) throw new Error("You have to add return to columnsBodyCallback function");
+				$(tempTd).attr({'filterGridId':j,'columnValue':options.data[i][j].toLowerCase()})
 				td.push(tempTd);
 			}
-			var trTemp = this.settings.rowsBodyCallback.call({},$("<tr>").addClass("ui-bar-d").css({"font-size":"small"}).append($(td))[0],data[i],i);
+			var trTemp = this.settings.rowsBodyCallback.call({},$("<tr>").addClass("ui-bar-d").css({"font-size":"small"}).append($(td))[0],options.data[i],i);
 			if(!(!!trTemp)) throw new Error("You have to add return to rowsBodyCallback function");
 			tr.push(trTemp);
 		}
@@ -150,14 +156,15 @@
 		for(var i in this.columns){
 			var content = this.settings.columnsFilterCallback.call({},$("<td>")[0],this.settings.filterField[this.columns[i]]);
 			if(!(!!content)) throw new Error("You have to add return to columnsFilterCallback function");
-			if(!!this.settings.filterField[this.columns[i]]) $(content).append($("<input filterGridId='"+this.columns[i]+"' class='search-filter-field' type='text' data-mini='true'>")
+			$(content).attr('filterGridId',this.columns[i])
+			if(!!this.settings.filterField[this.columns[i]]) $(content).append($("<input class='search-filter-field' type='text' data-mini='true'>")
 				.on('keyup',(function(elem,type){
 					return function(){
-						var searchElem = {};
-						$(this).parent().siblings().andSelf().children('input[type="text"]').each(function(){
-							searchElem[$(this).attr('filterGridId')] = $(this).val()
-						})
-						grid.filterFunction(searchElem,elem);
+						clearTimeout(grid.filterTimeout);
+						var elem = this;
+						grid.filterTimeout = setTimeout(function() {
+							grid.filterFunction($(elem).parents('td:first').siblings().andSelf().filter(':has(.search-filter-field)'));
+						},700);
 					}
 				})(grid.columns[i],grid.settings.filterField[grid.columns[i]])));	
 			td.push($(content)[0]);
