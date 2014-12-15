@@ -14,11 +14,12 @@
 			filterField: {},
 			data: new Array(),
 			header: {},
+			icons: {},
 			dataSort:false,
 			rowsFilterCallback: function(row,headerData){return row;},
 			rowsHeaderCallback: function(row,headerData){return row;},
 			rowsBodyCallback: function(row,dataItem,idItem){return row;},
-			columnsBodyCallback: function(column,dataItem,idItemRow,idItem){return column;},
+			columnsBodyCallback: function(column,dataItem,idItem,idItemRow){return column;},
 			columnsHeaderCallback: function(column,dataItem){return column;},
 			columnsFilterCallback: function(column,dataItem){return column;},
 			id: "customGridView",
@@ -124,8 +125,10 @@
 		var options = {
 			data:this.settings.data,
 			needSort:false,
+			icons:this.settings.icons,
 			clearResult:true
 		};
+		var headerKeys = Object.keys(this.settings.header);
 		$.extend(options,data);
 		if(options.needSort && this.settings.dataSort) options.data = this.dataSort(options.data);
 		if(!!options.clearResult) $(this.tbody).empty();
@@ -136,13 +139,30 @@
 				//options.data[i][j]
 				if(!(!!options.data[i][j])) options.data[i][j] = '';
 				options.data[i][j] = options.data[i][j].toString();
-				var tempTd = this.settings.columnsBodyCallback.call({},$("<td>").addClass('history-table-column').append(options.data[i][j])[0],options.data[i][j],i,j);
+				var tempTd = this.settings.columnsBodyCallback.call({},$("<td>").addClass('history-table-column').append(options.data[i][j])[0],options.data[i][j],j,i);
 				if(!(!!tempTd)) throw new Error("You have to add return to columnsBodyCallback function");
 				$(tempTd).attr({'filterGridId':j,'columnValue':options.data[i][j].toLowerCase()})
 				td.push(tempTd);
 			}
+			if(!$.isEmptyObject(options.icons)){//debugger
+				var span = $();
+				for (var k in options.icons){
+					if($.type(options.icons[k]) !== "function") options.icons[k] = function(){};
+					span.push($('<span class="'+k+'">').on('click',(function(functionName,rowId){
+						return function(){
+							functionName(rowId);
+						}
+					})(options.icons[k],i))[0]);
+					
+				}
+				td.push($("<td>").addClass('history-table-column').attr({'filterGridId':'actions'}).append($(span))[0]);
+				if(headerKeys.length <= this.columns.length && i == 0){
+					$(this.thead).children('tr').append($("<th>").css({"font-size":"12px"}))
+				}
+			}
 			var trTemp = this.settings.rowsBodyCallback.call({},$("<tr>").addClass("ui-bar-d").css({"font-size":"small"}).append($(td))[0],options.data[i],i);
-			if(!(!!trTemp)) throw new Error("You have to add return to rowsBodyCallback function");
+			if($.type(trTemp) == 'undefined') throw new Error("You have to add return to rowsBodyCallback function");
+			if(!trTemp) continue;
 			tr.push(trTemp);
 		}
 		$(this.tbody).append($(tr));
@@ -154,7 +174,7 @@
 		var td = $();
 		var grid = this;
 		for(var i in this.columns){
-			var content = this.settings.columnsFilterCallback.call({},$("<td>")[0],this.settings.filterField[this.columns[i]]);
+			var content = this.settings.columnsFilterCallback.call({},$("<td>")[0],this.settings.filterField[this.columns[i]],this.columns[i]);
 			if(!(!!content)) throw new Error("You have to add return to columnsFilterCallback function");
 			$(content).attr('filterGridId',this.columns[i])
 			if(!!this.settings.filterField[this.columns[i]]) $(content).append($("<input class='search-filter-field' type='text' data-mini='true'>")
@@ -182,9 +202,9 @@
 		
 		var th = $();
 		for(var i in this.columns){
-			var content = this.settings.columnsHeaderCallback.call({},$("<th>").css({"font-size":"12px"})[0],this.settings.header[this.columns[i]]);
+			var content = this.settings.columnsHeaderCallback.call({},$("<th>").css({"font-size":"12px"})[0],this.settings.header[this.columns[i]],this.columns[i]);
 			if(!(!!content)) throw new Error("You have to add return to columnsHeaderCallback function");
-			
+			$(content).attr('headerfilterGridId',this.columns[i])
 			if(!!this.settings.header[this.columns[i]]) $(content).append(this.settings.header[this.columns[i]]);	
 			if(!!this.settings.orderField[this.columns[i]])	$(content).addClass('order-on').on('click',(function(elem,type){
 				return function(){
