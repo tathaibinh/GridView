@@ -1,8 +1,9 @@
 (function($){
-	function Grid(){
+	function Grid(domElem){
 		this.thead = $('<thead>');
 		this.tfoot = $('<tfoot>');
 		this.tbody = $('<tbody>');
+		this.domElem = domElem;
 		this.orderTypes = {
 			"date":this.dateSort,
 			"text":this.textSort,
@@ -15,6 +16,7 @@
 			data: new Array(),
 			header: {},
 			icons: {},
+			orderColumn: new Array(),
 			dataSort:false,
 			rowsFilterCallback: function(row,headerData){return row;},
 			rowsHeaderCallback: function(row,headerData){return row;},
@@ -66,11 +68,13 @@
 			
 		if(emptySearch){
 			$(this.tbody).children('tr').show();
+			$(this.domElem).trigger('filtrationFinish');
 			return;
 		}
 		var selector = "tr"+partSelector.join('');
 		$(this.tbody).children('tr').hide();
 		$(this.tbody).children(selector).show();
+		$(this.domElem).trigger('filtrationFinish');
 		return;
 	}
 	Grid.prototype.orderFunction = function(elem,type){
@@ -128,6 +132,7 @@
 			icons:this.settings.icons,
 			clearResult:true
 		};
+		var columns = this.columns;
 		var headerKeys = Object.keys(this.settings.header);
 		$.extend(options,data);
 		if(options.needSort && this.settings.dataSort) options.data = this.dataSort(options.data);
@@ -135,16 +140,15 @@
 		var tr = $();
 		for (var i=0;i<options.data.length;i++){
 			var td = $();
-			for (var j in options.data[i]){
-				//options.data[i][j]
-				if(!(!!options.data[i][j])) options.data[i][j] = '';
-				options.data[i][j] = options.data[i][j].toString();
-				var tempTd = this.settings.columnsBodyCallback.call({},$("<td>").addClass('history-table-column').append(options.data[i][j])[0],options.data[i][j],j,i);
+			for (var j=0;j<columns.length;j++){
+				if(!(!!options.data[i][columns[j]])) options.data[i][columns[j]] = '';
+				options.data[i][columns[j]] = options.data[i][columns[j]].toString();
+				var tempTd = this.settings.columnsBodyCallback.call({},$("<td>").addClass('history-table-column').append(options.data[i][columns[j]])[0],options.data[i][columns[j]],columns[j],i);
 				if(!(!!tempTd)) throw new Error("You have to add return to columnsBodyCallback function");
-				$(tempTd).attr({'filterGridId':j,'columnValue':options.data[i][j].toLowerCase()})
+				$(tempTd).attr({'filterGridId':columns[j],'columnValue':options.data[i][columns[j]].toLowerCase()})
 				td.push(tempTd);
 			}
-			if(!$.isEmptyObject(options.icons)){//debugger
+			if(!$.isEmptyObject(options.icons)){
 				var span = $();
 				for (var k in options.icons){
 					if($.type(options.icons[k]) !== "function") options.icons[k] = function(){};
@@ -230,6 +234,14 @@
 		if($.type(data[0]) != 'object') throw new Error("Data must be array with objects");
 		this.settings.data = data;
 		this.columns = Object.keys(this.settings.data[0]);
+		var columns = this.columns ;
+		if(this.settings.orderColumn.length){
+			var isSame = (this.settings.orderColumn.length == columns.length) && this.settings.orderColumn.every(function(element, index) {
+				return columns.indexOf(element) > -1
+			});
+			if(!isSame) throw new Error("Order columns must be the same like columns in data");
+			this.columns = this.settings.orderColumn;
+		}
 	
 	}
 	Grid.prototype.setOrder = function(orderName){
@@ -243,13 +255,13 @@
 
 	
 	$.fn.createGrid = function (options) {
-		var grid = new Grid();
+		var grid = new Grid(this);
 		if(!!options && $.type(options) == 'object'){ 
 			if(!!options.needReturn) return grid.init(options);
 			$(this).html(grid.init(options));
 			return;
 		}
-        return grid;
+		return grid;
     };
 
 })($)

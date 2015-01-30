@@ -1,0 +1,25 @@
+.btnDelImgCustom {
+	background-image: url("data:image/gif;base64,R0lGODlhEgARAPcAAP////Pz89fX15oAAP8AAM4AAOfn58LCwrKysoKCgpqams4xMf+aMZplZV1dXf9lAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAA4ALAAAAAASABEAAAhiAB0IHEiwoMGDCBMqdNCgQIOEBQoWYEBggMECFi8SqEgQY0IEBTg6wIgAgcKQA0iaXIhSwcqTFSu+RIgyQQKRNCsmUCAQZ8EFDwrsJEjg4AKKAxIYLPqT40yFSXkeZLoQYUAAOw==");
+	background-repeat: no-repeat;
+	cursor: pointer;
+	display: block;
+	height:17px;
+	float: right;
+	width:18px;
+	margin: 0 0 0 15px;
+}
+
+.btnAddImgCustom {
+	background-image: url("data:image/gif;base64,R0lGODlhEAAQAPcAAABjADmlMUK1MUK9MUrOMVLeMVrnMWP3MWP/MZycnP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////5mZmSH5BAEAAP8ALAAAAAAQABAAAAhdAP8JHEiwoMGDCBECSJCQIAAECxv+e4gAIkMAER1WtDixYsaOHhlOPHAgIwCSBj5ONJAyAQCWLQsCKEBzZgECKgcCIMCTZ06dA4IO+OlQgACiDgMglSlS4r+mCAMCADs=");
+	background-size: 16px 17px;
+	background-repeat: no-repeat;
+	cursor: pointer;
+	float: left;
+	display: block;
+	height:17px;
+	width:18px;
+}
+
+td[filtergridId="actions"]{
+	min-width: 51px;
+}

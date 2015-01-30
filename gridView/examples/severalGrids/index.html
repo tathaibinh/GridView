@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script src='../jquery-1.11.0.js'></script>
+	<script src="../../grid.js"></script>
+	<link rel='stylesheet' href='../../style.css'/>
+	<title>Document</title>
+</head>
+<body>
+	<div class="container"  style="overflow-x:auto;">
+		<div class="reportContainer" id="main"></div>
+		<div class="reportContainer" id="total"></div>
+	</div>
+</body>
+</html>
+
+
+<script>
+var LANGS = {
+	"mid_hsnf":'Member ID',
+	"firstName_hsnf":'First Name',
+	"lastName_hsnf":'Last Name',
+	"par_hsnf":"PAR (Y/N)",
+	"medicareId_hsnf":'Medicare ID',
+	"medicaidId_hsnf":'Medicaid ID',
+	"instName_hsnf":'Institution name',
+	"curAdmDate_hsnf":'Current Admit date',
+	"dateLastHospAdm_hsnf":'Date of Last Hospital Admission',
+	"daysLastHospAdm_hsnf":'# Days Since Last Hospital Admission',
+	"admitDiag_hsnf":'Admit Diagnosis',
+	"memberCurHosp_hsnf":'# Members Currently in Hospital:',
+	"memberCurSnf_hsnf":'# Members Currently in SNF LONG TERM',
+	"memberCurShortSnf_hsnf":'# Members Currently in SNF SHORT TERM',
+	"totalSnfStays_hsnf":'TOTAL # LONG TERM SNFStays this Month',
+	"totalShortSnfStays_hsnf":'TOTAL # SHORT TERM SNFStays this Month',
+	"totalSnfStays20_hsnf":'SNF Stays 0 - 20 Days',
+	"totalSnfStays100_hsnf":'SNF Stays 21 - 100 Days',
+	"totalSnfStays101_hsnf":'SNF Stays 101+ Days',
+};
+function Order(){
+	this.typeRequest = "GET";
+	this.url = "data.json";
+	this.resultReport = {};
+	this.gridOptions = {
+		main:{
+			tableCss:{width:"100%"},
+		}
+	};
+	this.onlyByType = false;
+	this.totalTemplate = {};
+};
+	
+Order.prototype.buildTable = function(data,createNew){
+	createNew = createNew || false;
+	var Snf = this;
+	var result = $();
+	for(var container in data.report){
+
+		var settings = {
+			data:new Array(),
+			header:{},
+		};
+		var options = $.extend(settings,Snf.gridOptions[container]);
+		
+		if(!!data.header && !!data.header[container]){
+			if(!!data.options && data.options[container]){
+				if(!!data.options[container]['orderField']) options.orderField = data.header[container];
+				if(!!data.options[container]['filterField']) options.filterField = data.header[container];
+			}
+
+			$.map(data.header[container],function(val,key){
+				options.header[key] = LANGS[key];
+			})
+		}
+
+		options.data = data['report'][container];
+		if(!!createNew){
+			options.needReturn = true;
+			result.push($("<div />").createGrid(options))
+		}
+		if(!createNew){
+			$("#"+container).createGrid(options);
+			$("#"+container).trigger('create');
+		}
+		
+	}
+	
+	return result;
+	
+}
+Order.prototype.request =  function(options){
+	options = options || {};
+	var d = $.Deferred();
+	var settings = {
+		dataType:"json",
+		type:this.typeRequest,
+		async:true,
+		url:this.url,
+		data:{},
+		error:function(data){d.resolve(testData);},
+		success:function(data){d.resolve(data);},
+	};
+	
+	$.extend(settings, options);
+	$.ajax(settings);
+	return d.promise();	
+}
+var order = new Order();
+$(function(){
+	order.request().done(function(res){
+		if(!(!!res.report) || !!res.error){
+			return;
+		}
+	
+		order.resultReport = res;
+		order.buildTable(res);
+	})
+})
+
+
+
+
+var testData = {
+	"report": {
+		"main": [{
+			"mid_hsnf": "123456",
+			"lastName_hsnf": "Huang",
+			"firstName_hsnf": "Mei",
+			"medicareId_hsnf": "4849494",
+			"medicaidId_hsnf": "WW12345EE",
+			"instName_hsnf": "Fasility name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-10-28",
+			"dateLastHospAdm_hsnf": "2014-10-20",
+			"daysLastHospAdm_hsnf": "8",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "3456789",
+			"lastName_hsnf": "BENSON",
+			"firstName_hsnf": "ALBERTHA",
+			"medicareId_hsnf": "342343",
+			"medicaidId_hsnf": "ZM31927K",
+			"instName_hsnf": "Facility Name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-10-28",
+			"dateLastHospAdm_hsnf": "2014-09-28",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "123476",
+			"lastName_hsnf": "EDWARDS MELONEY",
+			"firstName_hsnf": "SYLVIA",
+			"medicareId_hsnf": "dsada46346346ghfg",
+			"medicaidId_hsnf": "RW38624H",
+			"instName_hsnf": "facility name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-10-28",
+			"dateLastHospAdm_hsnf": "2014-10-21",
+			"daysLastHospAdm_hsnf": "7",
+			"admitDiag_hsnf": "test diagnosis"
+		},
+		{
+			"mid_hsnf": "123",
+			"lastName_hsnf": "123123",
+			"firstName_hsnf": "1231",
+			"medicareId_hsnf": "121323",
+			"medicaidId_hsnf": "2313",
+			"instName_hsnf": "31231",
+			"par_hsnf": null,
+			"curAdmDate_hsnf": "2014-11-13",
+			"dateLastHospAdm_hsnf": "",
+			"daysLastHospAdm_hsnf": "",
+			"admitDiag_hsnf": "diagnose 1"
+		},
+		{
+			"mid_hsnf": "ewfwef",
+			"lastName_hsnf": "Testoff",
+			"firstName_hsnf": "Testoff",
+			"medicareId_hsnf": "qwdqwd",
+			"medicaidId_hsnf": "qwdqd",
+			"instName_hsnf": "efwef",
+			"par_hsnf": "No",
+			"curAdmDate_hsnf": "2014-10-13",
+			"dateLastHospAdm_hsnf": "2014-09-13",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "fwefwefwefwef"
+		},
+		{
+			"mid_hsnf": "long1",
+			"lastName_hsnf": "long1",
+			"firstName_hsnf": "long1",
+			"medicareId_hsnf": "long1",
+			"medicaidId_hsnf": "long1",
+			"instName_hsnf": "long1",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-11-18",
+			"dateLastHospAdm_hsnf": "2014-11-18",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "long1"
+		},
+		{
+			"mid_hsnf": "short1",
+			"lastName_hsnf": "short1",
+			"firstName_hsnf": "short1",
+			"medicareId_hsnf": "short1",
+			"medicaidId_hsnf": "short1",
+			"instName_hsnf": "short1",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-10-18",
+			"dateLastHospAdm_hsnf": "2014-09-18",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "short1"
+		},
+		{
+			"mid_hsnf": "hospital1",
+			"lastName_hsnf": "hospital1",
+			"firstName_hsnf": "hospital1",
+			"medicareId_hsnf": "hospital1",
+			"medicaidId_hsnf": "hospital1",
+			"instName_hsnf": "hospital1",
+			"par_hsnf": "No",
+			"curAdmDate_hsnf": "2014-10-18",
+			"dateLastHospAdm_hsnf": "2014-09-18",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "hospital1"
+		},
+		{
+			"mid_hsnf": "blank3",
+			"lastName_hsnf": "TestNY",
+			"firstName_hsnf": "Itest3",
+			"medicareId_hsnf": "blank3",
+			"medicaidId_hsnf": "blank3",
+			"instName_hsnf": "blank3",
+			"par_hsnf": null,
+			"curAdmDate_hsnf": "2014-11-18",
+			"dateLastHospAdm_hsnf": "2014-09-18",
+			"daysLastHospAdm_hsnf": "",
+			"admitDiag_hsnf": "blank3"
+		},
+		{
+			"mid_hsnf": "home1",
+			"lastName_hsnf": "home1",
+			"firstName_hsnf": "home1",
+			"medicareId_hsnf": "home1",
+			"medicaidId_hsnf": "home1",
+			"instName_hsnf": "home1",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-11-13",
+			"dateLastHospAdm_hsnf": "2014-11-07",
+			"daysLastHospAdm_hsnf": "6",
+			"admitDiag_hsnf": "home1"
+		},
+		{
+			"mid_hsnf": "new2",
+			"lastName_hsnf": "testWALFORD",
+			"firstName_hsnf": "testOLIVE",
+			"medicareId_hsnf": "new2",
+			"medicaidId_hsnf": "new2",
+			"instName_hsnf": "new2",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-11-17",
+			"dateLastHospAdm_hsnf": "2014-11-14",
+			"daysLastHospAdm_hsnf": "3",
+			"admitDiag_hsnf": "new2"
+		},
+		{
+			"mid_hsnf": "hiden1",
+			"lastName_hsnf": "hiden1",
+			"firstName_hsnf": "hiden1",
+			"medicareId_hsnf": "hiden1",
+			"medicaidId_hsnf": "hiden1",
+			"instName_hsnf": "hiden1",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-11-18",
+			"dateLastHospAdm_hsnf": "2014-09-18",
+			"daysLastHospAdm_hsnf": "",
+			"admitDiag_hsnf": "hiden1"
+		},
+		{
+			"mid_hsnf": "Member ID",
+			"lastName_hsnf": "Member Last Name",
+			"firstName_hsnf": "Member First Name",
+			"medicareId_hsnf": "435435435435",
+			"medicaidId_hsnf": "34324234",
+			"instName_hsnf": "facility",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-11-21",
+			"dateLastHospAdm_hsnf": "2014-11-21",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "34567899",
+			"lastName_hsnf": "Test",
+			"firstName_hsnf": "Ira",
+			"medicareId_hsnf": "6768696",
+			"medicaidId_hsnf": "RR567899UU",
+			"instName_hsnf": "Facility Name",
+			"par_hsnf": "No",
+			"curAdmDate_hsnf": "2014-12-26",
+			"dateLastHospAdm_hsnf": "2014-12-10",
+			"daysLastHospAdm_hsnf": "6",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "324234234234",
+			"lastName_hsnf": "Hicks",
+			"firstName_hsnf": "Steven",
+			"medicareId_hsnf": "Medicare Number",
+			"medicaidId_hsnf": "Medicaid Number",
+			"instName_hsnf": "Facility Name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-12-26",
+			"dateLastHospAdm_hsnf": "2014-12-26",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "Member ID",
+			"lastName_hsnf": "Midn",
+			"firstName_hsnf": "Kate",
+			"medicareId_hsnf": "Medicare Number",
+			"medicaidId_hsnf": "Medicaid Number",
+			"instName_hsnf": "Facility Name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-12-26",
+			"dateLastHospAdm_hsnf": "2014-12-25",
+			"daysLastHospAdm_hsnf": "1",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "Member ID",
+			"lastName_hsnf": "Stown",
+			"firstName_hsnf": "Alex",
+			"medicareId_hsnf": "Medicare Number",
+			"medicaidId_hsnf": "Medicaid Number",
+			"instName_hsnf": "",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-12-26",
+			"dateLastHospAdm_hsnf": "2014-12-11",
+			"daysLastHospAdm_hsnf": "5",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "",
+			"lastName_hsnf": "Fox",
+			"firstName_hsnf": "Ketrin",
+			"medicareId_hsnf": "ada",
+			"medicaidId_hsnf": "weddsd",
+			"instName_hsnf": "",
+			"par_hsnf": null,
+			"curAdmDate_hsnf": "2014-12-26",
+			"dateLastHospAdm_hsnf": "2014-12-26",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "asdSD"
+		},
+		{
+			"mid_hsnf": "sdfsdfsdfdfs",
+			"lastName_hsnf": "",
+			"firstName_hsnf": "",
+			"medicareId_hsnf": "",
+			"medicaidId_hsnf": "",
+			"instName_hsnf": "",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2015-01-05",
+			"dateLastHospAdm_hsnf": "",
+			"daysLastHospAdm_hsnf": "",
+			"admitDiag_hsnf": ""
+		}],
+		"total": [{
+			"memberCurHosp_hsnf": "0",
+			"memberCurSnf_hsnf": "0",
+			"totalSnfStays_hsnf": "0",
+			"memberCurShortSnf_hsnf": "0",
+			"totalShortSnfStays_hsnf": "0",
+			"totalSnfStays20_hsnf": "0",
+			"totalSnfStays100_hsnf": "0",
+			"totalSnfStays101_hsnf": "0"
+		}]
+	},
+	"header": {
+		"main": {
+			"mid_hsnf": "text",
+			"lastName_hsnf": "text",
+			"firstName_hsnf": "text",
+			"medicareId_hsnf": "text",
+			"medicaidId_hsnf": "text",
+			"instName_hsnf": "text",
+			"par_hsnf": "text",
+			"curAdmDate_hsnf": "text",
+			"dateLastHospAdm_hsnf": "text",
+			"daysLastHospAdm_hsnf": "text",
+			"admitDiag_hsnf": "text"
+		},
+		"total": {
+			"memberCurHosp_hsnf": "text",
+			"memberCurSnf_hsnf": "text",
+			"totalSnfStays_hsnf": "text",
+			"memberCurShortSnf_hsnf": "text",
+			"totalShortSnfStays_hsnf": "text",
+			"totalSnfStays20_hsnf": "text",
+			"totalSnfStays100_hsnf": "text",
+			"totalSnfStays101_hsnf": "text"
+		}
+	},
+	"options": {
+		"main": {
+			"orderField": true,
+			"filterField": true
+		},
+		"total": {
+			"orderField": false,
+			"filterField": false
+		}
+	}
+};
+</script>

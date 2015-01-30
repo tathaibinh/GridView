@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script src='../jquery-1.11.0.js'></script>
+	<script src="../../grid.js"></script>
+	<link rel='stylesheet' href='../../style.css'/>
+	<link rel='stylesheet' href='custom.css'/>
+	<title>Document</title>
+</head>
+<body>
+	<div class="container"  style="overflow-x:auto;">
+		<div class="reportContainer" id="main"></div>
+		<div class="reportContainer" id="total"></div>
+	</div>
+</body>
+</html>
+
+
+<script>
+
+function Order(){
+	this.typeRequest = "GET";
+	this.url = "data.json";
+	this.gridOptions = {
+		main:{
+			tableCss:{width:"100%"},
+		}
+	};
+	this.onlyByType = false;
+	this.totalTemplate = {};
+};
+	
+Order.prototype.buildTable = function(data,container){
+	var Snf = this;
+	var result = $();
+
+	if(!(!!data.header[container]) || !(!!data.report[container])) 
+		return;
+	
+	var options = {
+		tableCss:{width:"100%"},	/*add CSS for grid*/
+		tableClass:'customName',	/*add class for grid*/
+		data:data['report'][container],		/*add data into grid*/
+		rowsFilterCallback:function(row,headerData){		/*Callback which call when row with filters will be generated */
+			/*do something*/
+			return row;
+		},
+		rowsHeaderCallback: function(row,headerData){		/*Callback which call when row with heading will be generated */
+			/*do something*/
+			return row;
+		},
+		rowsBodyCallback: function(row,dataItem,idItem){		/*Callback which call when row with data will be generated */
+			/*do something*/
+			return row;
+		},
+		columnsBodyCallback: function(column,dataItem,idItem,idItemRow){		/*Callback which call when column with data will be generated */
+			$(column).click(function(){
+				alert('Your position: row = '+idItemRow+' and columnId = '+idItem);
+			});
+			/*do something*/
+			return column;
+		},
+		columnsHeaderCallback: function(column,dataItem){		/*Callback which call when column with heading will be generated */
+			/*do something*/
+			return column;
+		},
+		columnsFilterCallback: function(column,dataItem){		/*Callback which call when column with filter will be generated */
+			/*do something*/
+			return column;
+		},
+		icons:{													/*Icons will be added with classes:"btnAddImgCustom","btnDelImgCustom", and with relevant callbacks */
+			'btnAddImgCustom':function(rowId){/*do something*/},
+			'btnDelImgCustom':function(rowId){/*do something*/},
+		},
+		orderColumn: new Array('firstName_hsnf','lastName_hsnf','mid_hsnf','admitDiag_hsnf','medicaidId_hsnf','dateLastHospAdm_hsnf','daysLastHospAdm_hsnf','medicareId_hsnf','curAdmDate_hsnf','instName_hsnf','par_hsnf'),		/*Columns will be established in relevant order*/
+		orderField:{											/*This option establish fields which will be have possibility ordering */
+			"mid_hsnf": "text",
+			"lastName_hsnf": "text",
+			"firstName_hsnf": "text",
+			"medicareId_hsnf": "text",
+			"dateLastHospAdm_hsnf": "date",
+		},
+		filterField:{											/*This option establish fields which will be have possibility filtering */
+			"mid_hsnf": "text",
+			"lastName_hsnf": "text",
+			"firstName_hsnf": "text",
+			"medicareId_hsnf": "text",
+			"dateLastHospAdm_hsnf": "date",
+			"daysLastHospAdm_hsnf": "text",
+			"admitDiag_hsnf": "text"
+		},
+		header: {												/*This option establish fields which will be have headline */
+			"mid_hsnf": "Member ID",
+			"lastName_hsnf": "Last Name",
+			"firstName_hsnf": "First Name",
+			"medicareId_hsnf": "Medicare ID",
+			"dateLastHospAdm_hsnf": "Date of Last Hospital Admission",
+			"daysLastHospAdm_hsnf": "# Days Since Last Hospital Admission",
+			"admitDiag_hsnf": "Admit Diagnosis"
+		},
+		dataSort: {												/*This option establish default order in grid */
+			type:'up',
+			name:'firstName_hsnf',
+		}
+	};
+	
+
+	
+
+
+
+	$("#"+container).createGrid(options);
+		
+
+	return result;
+	
+}
+
+
+$(function(){
+	var order = new Order();
+	order.buildTable(testData,'main');
+})
+
+
+
+
+var testData = {
+	"report": {
+		"main": [{
+			"mid_hsnf": "123456",
+			"lastName_hsnf": "Huang",
+			"firstName_hsnf": "Mei",
+			"medicareId_hsnf": "4849494",
+			"medicaidId_hsnf": "WW12345EE",
+			"instName_hsnf": "Fasility name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-10-28",
+			"dateLastHospAdm_hsnf": "2014-10-20",
+			"daysLastHospAdm_hsnf": "8",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "3456789",
+			"lastName_hsnf": "BENSON",
+			"firstName_hsnf": "ALBERTHA",
+			"medicareId_hsnf": "342343",
+			"medicaidId_hsnf": "ZM31927K",
+			"instName_hsnf": "Facility Name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-10-28",
+			"dateLastHospAdm_hsnf": "2014-09-28",
+			"daysLastHospAdm_hsnf": "0",
+			"admitDiag_hsnf": "Admission Diagnosis"
+		},
+		{
+			"mid_hsnf": "123476",
+			"lastName_hsnf": "EDWARDS MELONEY",
+			"firstName_hsnf": "SYLVIA",
+			"medicareId_hsnf": "dsada46346346ghfg",
+			"medicaidId_hsnf": "RW38624H",
+			"instName_hsnf": "facility name",
+			"par_hsnf": "Yes",
+			"curAdmDate_hsnf": "2014-10-28",
+			"dateLastHospAdm_hsnf": "2014-10-21",
+			"daysLastHospAdm_hsnf": "7",
+			"admitDiag_hsnf": "test diagnosis"
+		}]
+	},
+	"header": {
+		"main": {
+			"mid_hsnf": "text",
+			"lastName_hsnf": "text",
+			"firstName_hsnf": "text",
+			"medicareId_hsnf": "text",
+			"medicaidId_hsnf": "text",
+			"instName_hsnf": "text",
+			"par_hsnf": "text",
+			"curAdmDate_hsnf": "text",
+			"dateLastHospAdm_hsnf": "text",
+			"daysLastHospAdm_hsnf": "text",
+			"admitDiag_hsnf": "text"
+		}
+	},
+	"options": {
+		"main": {
+			"orderField": true,
+			"filterField": true
+		}
+	}
+};
+</script>
