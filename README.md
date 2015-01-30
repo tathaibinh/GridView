@@ -1,15 +1,15 @@
-This is module which gets easier work with big report data.
-You could customize it very flexible.
-This module shows your data as grid and it could be used for building reports.
+<h1>JS Grid View</h1>
+<p>This is module which gets easier work with big report data.</p>
+<p>You could customize it very flexible.</p>
+<p>This module shows your data as grid and it could be used for building reports.</p>
 
-Features:
-Flexible customization allow prepared your grid as you want.
-You can add sorting or ordering for some fields, add callbacks for every element in the grid and make column with action icons.
+<h2>Features:<h2>
+<p>Flexible customization allow prepared your grid as you want.</p>
+<p>You can add sorting or ordering for some fields, add callbacks for every element in the grid and make column with action icons.</p>
+<br>
+<h4>There are options which you can use for settings:</h4>
 
-There are options which you can use for settings:
-
-
-
+<pre>
 var options = {
 	tableCss:{width:"100%"},	/*add CSS for grid*/
 	tableClass:'customName',	/*add class for grid*/
@@ -75,4 +75,4 @@ var options = {
 		type:'up',
 		name:'firstName_hsnf',
 	}
-};
+};</pre>
